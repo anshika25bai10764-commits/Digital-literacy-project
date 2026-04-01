@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Literacy — Student Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050A0E;
+    --grid: #0d1a22;
+    --cyan: #00F5D4;
+    --yellow: #FFE14D;
+    --pink: #FF4D8D;
+    --blue: #4D9EFF;
+    --white: #E8F4F8;
+    --dim: #5A7A8A;
+    --card: rgba(13,30,45,0.85);
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; min-height: 100vh;
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--white);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  #cursor-ring {
+    position: fixed; top: 0; left: 0; z-index: 9999; pointer-events: none;
+    width: 36px; height: 36px;
+    border: 2px solid var(--cyan);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: transform 0.12s ease, width 0.2s, height 0.2s, border-color 0.2s, background 0.2s;
+    mix-blend-mode: exclusion;
+  }
+  #cursor-dot {
+    position: fixed; top: 0; left: 0; z-index: 10000; pointer-events: none;
+    width: 6px; height: 6px;
+    background: var(--cyan);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: background 0.2s;
+  }
+  body.hovering #cursor-ring {
+    width: 60px; height: 60px;
+    background: rgba(0,245,212,0.08);
+    border-color: var(--yellow);
+  }
+  body.hovering #cursor-dot { background: var(--yellow); }
+  .spark {
+    position: fixed; pointer-events: none; z-index: 9998;
+    width: 5px; height: 5px; border-radius: 50%;
+    animation: sparkFade 0.6s forwards;
+  }
+  @keyframes sparkFade {
+    0%   { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0); }
+  }
+  .grid-bg {
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+  }
+  .orb {
+    position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+    filter: blur(90px); opacity: 0.18;
+    animation: drift 12s ease-in-out infinite alternate;
+  }
+  .orb1 { width: 500px; height: 500px; background: var(--cyan); top: -120px; left: -120px; animation-delay: 0s; }
+  .orb2 { width: 400px; height: 400px; background: var(--pink); bottom: -100px; right: -100px; animation-delay: -4s; }
+  .orb3 { width: 300px; height: 300px; background: var(--blue); top: 40%; left: 60%; animation-delay: -8s; }
+  @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,20px) scale(1.1); } }
+  .page {
+    position: relative; z-index: 1;
+    max-width: 1100px; margin: 0 auto;
+    padding: 36px 28px 48px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 28px;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid rgba(0,245,212,0.2);
+    padding-bottom: 20px;
+  }
+  .logo-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem; color: var(--cyan);
+    letter-spacing: 0.15em; text-transform: uppercase;
+    border: 1px solid var(--cyan);
+    padding: 4px 10px; border-radius: 2px;
+  }
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 800;
+    line-height: 1;
+    text-align: center;
+    letter-spacing: -0.03em;
+    flex: 1;
+  }
+  header h1 span { color: var(--cyan); }
+  .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem; color: var(--yellow);
+    border: 1px solid rgba(255,225,77,0.4);
+    padding: 4px 10px; border-radius: 2px;
+    text-align: right; line-height: 1.6;
+  }
+  .hero-strip {
+    display: flex; align-items: center; gap: 20px;
+    background: rgba(0,245,212,0.04);
+    border: 1px solid rgba(0,245,212,0.15);
+    border-radius: 8px;
+    padding: 18px 24px;
+  }
+  .hero-icon { font-size: 2.2rem; flex-shrink: 0; }
+  .hero-strip p {
+    font-size: 0.95rem; line-height: 1.6; color: var(--white);
+    max-width: 780px;
+  }
+  .hero-strip p strong { color: var(--cyan); }
+  .hero-strip p em { color: var(--yellow); font-style: normal; }
+  .sections {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto;
+    gap: 16px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 22px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+  .card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--accent, var(--cyan));
+    border-radius: 10px 10px 0 0;
+  }
+  .card::after {
+    content: attr(data-num);
+    position: absolute; bottom: 12px; right: 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 3.5rem; font-weight: 700;
+    color: rgba(255,255,255,0.04);
+    line-height: 1; pointer-events: none;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    border-color: var(--accent, var(--cyan));
+    z-index: 2;
+  }
+
+  .card-icon { font-size: 1.6rem; margin-bottom: 10px; display: block; }
+  .card h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem; font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--accent, var(--cyan));
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .card p { font-size: 0.82rem; line-height: 1.65; color: #b0cad4; }
+  .pill-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .pill {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    padding: 3px 9px; border-radius: 20px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--white);
+    transition: background 0.2s, color 0.2s;
+  }
+  .pill:hover { background: var(--accent, var(--cyan)); color: #000; }
+  .icon-list { list-style: none; margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .icon-list li { font-size: 0.8rem; display: flex; gap: 8px; align-items: flex-start; }
+  .icon-list li::before {
+    content: attr(data-i);
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .c1 { --accent: var(--cyan); }
+  .c2 { --accent: var(--blue); }
+  .c3 { --accent: var(--pink); }
+  .c4 { --accent: var(--yellow); }
+  .c5 { --accent: #A78BFA; }
+  .wide { grid-column: span 2; }
+  .stat-bar { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .stat-row { display: flex; flex-direction: column; gap: 3px; }
+  .stat-label { font-size: 0.72rem; color: #8aa5b0; display: flex; justify-content: space-between; }
+  .stat-label span { color: var(--white); font-weight: 500; }
+  .bar-track { height: 5px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+  .bar-fill {
+    height: 100%; border-radius: 4px;
+    background: var(--accent, var(--cyan));
+    width: 0;
+    transition: width 1.2s cubic-bezier(.4,0,.2,1);
+  }
+  footer {
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    padding-top: 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--dim);
+  }
+  footer .dot-row { display: flex; gap: 6px; align-items: center; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .scanlines {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom, transparent 0, transparent 3px,
+      rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px
+    );
+    opacity: 0.35;
+  }
+  @keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0 rgba(0,245,212,0.35); }
+    70%  { box-shadow: 0 0 0 10px rgba(0,245,212,0); }
+    100% { box-shadow: 0 0 0 0 rgba(0,245,212,0); }
+  }
+  .card:hover { animation: pulse-ring 1s ease-out; }
+  .typed::after {
+    content: '|';
+    animation: blink 0.8s step-end infinite;
+    color: var(--cyan);
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  @media (max-width: 760px) {
+    .sections { grid-template-columns: 1fr 1fr; }
+    .wide { grid-column: span 2; }
+    header { flex-direction: column; gap: 10px; text-align: center; }
+    .badge { text-align: center; }
+  }
+  @media (max-width: 520px) {
+    .sections { grid-template-columns: 1fr; }
+    .wide { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div id="cursor-ring"></div>
+<div id="cursor-dot"></div>
+
+<!-- Background -->
+<div class="grid-bg"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+<div class="scanlines"></div>
+
+<div class="page">
+
+  <!-- Header -->
+  <header>
+    <h1>Digital <span>Literacy</span></h1>
+    <div class="badge">Student<br>Resource</div>
+  </header>
+
+  <!-- Hero definition -->
+  <div class="hero-strip">
+    <div class="hero-icon">🌐</div>
+    <p>
+      <strong>Digital Literacy</strong> is the ability to find, evaluate, create, and communicate information using digital technologies safely and ethically.
+      In today's world it's not just a skill — it's <em>your superpower as a student.</em>
+      From researching assignments to building your professional brand online, being digitally literate helps you thrive in academics and beyond.
+    </p>
+  </div>
+
+  <!-- Section cards -->
+  <div class="sections">
+
+    <!-- 1: What is Digital Literacy -->
+    <div class="card c1" data-num="01">
+      <span class="card-icon">💡</span>
+      <h2>What is Digital Literacy?</h2>
+      <p>It's a <strong style="color:var(--cyan)">5-skill framework</strong> that every student needs:</p>
+      <ul class="icon-list">
+        <li data-i="🔍">Find &amp; evaluate credible information online</li>
+        <li data-i="🛡️">Stay safe and protect your privacy</li>
+        <li data-i="✍️">Create content responsibly</li>
+        <li data-i="🤝">Collaborate using digital tools</li>
+        <li data-i="⚖️">Understand digital ethics &amp; rights</li>
+      </ul>
+    </div>
+
+    <!-- 2: Digital Tools -->
+    <div class="card c2" data-num="02">
+      <span class="card-icon">🛠️</span>
+      <h2>Useful Digital Tools</h2>
+      <p>Level up your student workflow with the right stack:</p>
+      <div class="pill-list">
+        <span class="pill">Notion</span>
+        <span class="pill">Google Drive</span>
+        <span class="pill">Canva</span>
+        <span class="pill">Zotero</span>
+        <span class="pill">Grammarly</span>
+        <span class="pill">ChatGPT</span>
+        <span class="pill">Trello</span>
+        <span class="pill">Figma</span>
+        <span class="pill">Overleaf</span>
+        <span class="pill">Miro</span>
+        <span class="pill">Calendly</span>
+        <span class="pill">GitHub</span>
+      </div>
+    </div>
+
+    <!-- 3: Safe Internet -->
+    <div class="card c3" data-num="03">
+      <span class="card-icon">🔒</span>
+      <h2>Safe Internet Practices</h2>
+      <ul class="icon-list">
+        <li data-i="🔑">Use strong, unique passwords + a manager</li>
+        <li data-i="📲">Enable 2-factor authentication everywhere</li>
+        <li data-i="🚫">Don't click suspicious links or attachments</li>
+        <li data-i="📶">Avoid public Wi-Fi for sensitive tasks; use VPN</li>
+        <li data-i="🕵️">Check privacy settings on every app</li>
+        <li data-i="💾">Back up important files regularly</li>
+      </ul>
+    </div>
+
+    <!-- 4: Professional Presence (wide) -->
+    <div class="card c4 wide" data-num="04">
+      <span class="card-icon">🌟</span>
+      <h2>Professional Online Presence</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div>
+          <p style="margin-bottom:8px;">Your online profile is your <strong style="color:var(--yellow)">digital résumé</strong>. Recruiters google you before interviews.</p>
+          <ul class="icon-list">
+            <li data-i="📸">Use a clear, professional profile photo</li>
+            <li data-i="📝">Keep LinkedIn headline updated with skills</li>
+            <li data-i="🗂️">Showcase projects on GitHub / portfolio site</li>
+            <li data-i="🔗">Use a consistent username across platforms</li>
+          </ul>
+        </div>
+        <div>
+          <p style="font-size:0.75rem;color:#8aa5b0;margin-bottom:6px;">Platform strength for students</p>
+          <div class="stat-bar" id="statbars">
+            <div class="stat-row">
+              <div class="stat-label">LinkedIn <span>Career</span></div>
+              <div class="bar-track"><div class="bar-fill" data-w="90" style="background:var(--yellow)"></div></div>
+            </div>
+            <div class="stat-row">
+              <div class="stat-label">GitHub <span>Projects</span></div>
+              <div class="bar-track"><div class="bar-fill" data-w="80" style="background:var(--blue)"></div></div>
+            </div>
+            <div class="stat-row">
+              <div class="stat-label">Behance / Dribbble <span>Design</span></div>
+              <div class="bar-track"><div class="bar-fill" data-w="70" style="background:var(--pink)"></div></div>
+            </div>
+            <div class="stat-row">
+              <div class="stat-label">X / Twitter <span>Networking</span></div>
+              <div class="bar-track"><div class="bar-fill" data-w="55" style="background:var(--cyan)"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5: Email Etiquette -->
+    <div class="card c5" data-num="05">
+      <span class="card-icon">📧</span>
+      <h2>Email Etiquette</h2>
+      <ul class="icon-list">
+        <li data-i="✅">Clear subject line — be specific</li>
+        <li data-i="✅">Start with proper greeting (Dear Prof. …)</li>
+        <li data-i="✅">State your purpose in the first line</li>
+        <li data-i="✅">Keep it concise — under 150 words</li>
+        <li data-i="✅">Proofread before hitting Send</li>
+        <li data-i="❌">Avoid slang, emojis, ALL CAPS</li>
+        <li data-i="❌">Never send without a signature block</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div>Student Digital Ambassador Initiative · Digital Literacy Week</div>
+    <div class="dot-row">
+      <div class="dot" style="background:var(--cyan)"></div>
+      <div class="dot" style="background:var(--blue)"></div>
+      <div class="dot" style="background:var(--pink)"></div>
+      <div>Be Smart · Stay Safe · Stay Professional</div>
+    </div>
+  </footer>
+
+</div><!-- /page -->
+
+<script>
+  /* ── Cursor ── */
+  const ring = document.getElementById('cursor-ring');
+  const dot  = document.getElementById('cursor-dot');
+  let mx=0, my=0, rx=0, ry=0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+    spawnSpark(mx, my);
+  });
+
+  (function animRing() {
+    rx += (mx - rx) * 0.13;
+    ry += (my - ry) * 0.13;
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+    requestAnimationFrame(animRing);
+  })();
+
+  document.querySelectorAll('a,button,.card,.pill').forEach(el => {
+    el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+  });
+
+  /* ── Sparks ── */
+  const sparkColors = ['#00F5D4','#FFE14D','#FF4D8D','#4D9EFF','#A78BFA'];
+  let lastSpark = 0;
+  function spawnSpark(x, y) {
+    const now = Date.now();
+    if (now - lastSpark < 40) return;
+    lastSpark = now;
+    const s = document.createElement('div');
+    s.className = 'spark';
+    s.style.left = (x + (Math.random()-0.5)*14) + 'px';
+    s.style.top  = (y + (Math.random()-0.5)*14) + 'px';
+    s.style.background = sparkColors[Math.floor(Math.random()*sparkColors.length)];
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 600);
+  }
+
+  /* ── Animate stat bars on load ── */
+  setTimeout(() => {
+    document.querySelectorAll('.bar-fill').forEach(b => {
+      b.style.width = b.dataset.w + '%';
+    });
+  }, 500);
+
+  /* ── Typed effect on hero ── */
+  const heroP = document.querySelector('.hero-strip p strong');
+  if (heroP) heroP.classList.add('typed');
+</script>
+
+</body>
+</html>
